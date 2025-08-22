@@ -1,0 +1,30 @@
+name: orcamento_solar
+description: Aplicativo Flutter para gerar orçamentos de energia solar.
+publish_to: 'none' # Remover esta linha se for publicar no pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Ícones do Material
+  cupertino_icons: ^1.0.8
+
+  # Formatação de valores (moeda, números, datas)
+  intl: ^0.19.0
+
+  # Gerar e exportar PDF
+  pdf: ^3.11.0
+  printing: ^5.13.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

@@ -17,6 +17,12 @@ dependencies:
   # Formatação de valores (moeda, números, datas)
   intl: ^0.19.0
 
+  #Compartilhar no whatsapp
+  share_plus: ^10.0.2
+
+  #URL Launcher
+  url_launcher: ^6.3.0
+  
   # Gerar e exportar PDF
   pdf: ^3.11.0
   printing: ^5.13.3

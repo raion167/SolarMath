@@ -6,6 +6,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
+// 👇 ALTERAÇÃO: import para compartilhar no WhatsApp
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(SolarApp());
@@ -268,6 +270,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
   }
 }
 
+//============RESUMO DO ORÇAMENTO E PAINEIS DE APRESENTAÇÃO
 class OrcamentoPage extends StatelessWidget {
   final String nome;
   final double consumo;
@@ -305,7 +308,7 @@ class OrcamentoPage extends StatelessWidget {
     DESCRIÇÃO DO KIT
     Cliente: $nome
     Sistema Fotovoltaico de ${potenciaTotal.toStringAsFixed(2)} kWp
-    com $qtdPaineis Painéis (585W) + 1 Inversor 3K
+    com $qtdPaineis Painéis (585W) +
 
     Valor do Investimento: ${moeda.format(investimento)}
 
@@ -393,15 +396,15 @@ class OrcamentoPage extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 24),
 
+            SizedBox(height: 24),
             // Texto completo do orçamento
             Text(
               orcamentoTexto,
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
-            SizedBox(height: 24),
 
+            SizedBox(height: 24),
             // Botão para copiar orçamento
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -416,8 +419,8 @@ class OrcamentoPage extends StatelessWidget {
               },
               child: Text("Copiar Orçamento"),
             ),
-            SizedBox(height: 12),
 
+            SizedBox(height: 12),
             // Botão para exportar em PDF
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -437,6 +440,23 @@ class OrcamentoPage extends StatelessWidget {
                     onLayout: (PdfPageFormat format) async => pdf.save());
               },
               child: Text("Exportar em PDF"),
+            ),
+
+            SizedBox(height: 12),
+            // 👇 ALTERAÇÃO: Botão de compartilhar no WhatsApp
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                final url = Uri.parse(
+                    "https://wa.me/?text=${Uri.encodeComponent(orcamentoTexto)}");
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              label: Text("Compartilhar no WhatsApp"),
             ),
           ],
         ),

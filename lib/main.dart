@@ -373,6 +373,8 @@ class OrcamentoPage extends StatelessWidget {
 
     Valor do Investimento: ${moeda.format(investimento)}
 
+    ESTIMATIVA DE PARCELA (3 meses de carência)
+
     Geração Mensal: ${geracaoMensal.toStringAsFixed(2)} kWh
     Economia Mensal: ${moeda.format(economiaMensal)}
     Potência do Sistema: ${potenciaTotal.toStringAsFixed(2)} kWp
@@ -488,7 +490,7 @@ class OrcamentoPage extends StatelessWidget {
                         SnackBar(content: Text("Orçamento copiado!")),
                       );
                     },
-                    child: Text("COPIAR O ORÇAMENTO"),
+                    child: Text("COPIAR"),
                   ),
                 ),
                 SizedBox(width: 8),
@@ -516,7 +518,7 @@ class OrcamentoPage extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Flexible(
-                  flex: 4, // botão WhatsApp um pouco maior
+                  flex: 3, // botão WhatsApp um pouco maior
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
@@ -530,11 +532,17 @@ class OrcamentoPage extends StatelessWidget {
                             mode: LaunchMode.externalApplication);
                       }
                     },
-                    label: Text("COMPARTILHAR NO WHATSAPP"),
+                    label: Text("WHATSAPP"),
                   ),
                 ),
               ],
             ),
+
+            /*  const SizedBox(height: 12),
+            const Text(
+              "Desenvolvido por João Pedro - Todos os direitos reservados",
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),*/
 
             SizedBox(height: 24),
             Text("Propostas de Parcelamento",

@@ -100,6 +100,37 @@ class _DadosClientePageState extends State<DadosClientePage> {
     });
   }
 
+  final List<Map<String, dynamic>> tabelaInversores = [
+    {"min": 2, "max": 8, "potencia": "3K"},
+    {"min": 10, "max": 11, "potencia": "4K"},
+    {"min": 12, "max": 13, "potencia": "5K"},
+    {"min": 14, "max": 15, "potencia": "6K"},
+    {"min": 16, "max": 19, "potencia": "7,5K"},
+    {"min": 20, "max": 20, "potencia": "8K"},
+    {"min": 21, "max": 26, "potencia": "10K"},
+    {"min": 27, "max": 36, "potencia": "15K"},
+    {"min": 38, "max": 51, "potencia": "20K"},
+    {"min": 52, "max": 76, "potencia": "30K"},
+    {"min": 77, "max": 92, "potencia": "36K"},
+    {"min": 93, "max": 107, "potencia": "37,5K"},
+    {"min": 108, "max": 145, "potencia": "50K"},
+  ];
+
+  Map<String, dynamic> calcularInversor(int qtdPaineis) {
+    for (var faixa in tabelaInversores) {
+      if (qtdPaineis >= faixa["min"] && qtdPaineis <= faixa["max"]) {
+        return {
+          "qtd": 1,
+          "potencia": faixa["potencia"],
+        };
+      }
+    }
+    return {
+      "qtd": 1,
+      "potencia": "Não definido",
+    };
+  }
+
   // ====== GERAÇÃO DO ORÇAMENTO (RECALCULA PARA GARANTIR CONSISTÊNCIA) ======
   void _gerarOrcamento() {
     final consumo = _parseConsumo(consumoController.text);
@@ -118,6 +149,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
     double economiaAnual = economiaMensal * 12;
     double economia25anos = economiaAnual * 25;
 
+    final inv = calcularInversor(qtdPaineis);
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -132,6 +165,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
           economiaMensal: economiaMensal,
           economiaAnual: economiaAnual,
           economia25anos: economia25anos,
+          qtdInversores: inv["qtd"],
+          potenciaInversor: inv["potencia"],
         ),
       ),
     );
@@ -260,7 +295,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
                   }
                   _gerarOrcamento();
                 },
-                child: const Text("Gerar Orçamento"),
+                child: const Text("GERAR ORÇAMENTO"),
               ),
             ],
           ),
@@ -282,18 +317,23 @@ class OrcamentoPage extends StatelessWidget {
   final double economiaMensal;
   final double economiaAnual;
   final double economia25anos;
+  final int qtdInversores;
+  final String potenciaInversor;
 
-  OrcamentoPage(
-      {required this.nome,
-      required this.consumo,
-      required this.qtdPaineis,
-      required this.potenciaTotal,
-      required this.precoPorKwp,
-      required this.investimento,
-      required this.geracaoMensal,
-      required this.economiaMensal,
-      required this.economiaAnual,
-      required this.economia25anos});
+  OrcamentoPage({
+    required this.nome,
+    required this.consumo,
+    required this.qtdPaineis,
+    required this.potenciaTotal,
+    required this.precoPorKwp,
+    required this.investimento,
+    required this.geracaoMensal,
+    required this.economiaMensal,
+    required this.economiaAnual,
+    required this.economia25anos,
+    required this.qtdInversores,
+    required this.potenciaInversor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -307,8 +347,8 @@ class OrcamentoPage extends StatelessWidget {
     String orcamentoTexto = """
     DESCRIÇÃO DO KIT
     Cliente: $nome
-    Sistema Fotovoltaico de ${potenciaTotal.toStringAsFixed(2)} kWp
-    com $qtdPaineis Painéis (585W) +
+    Sistema Fotovoltaico de ${potenciaTotal.toStringAsFixed(2)} kWp 
+    com $qtdPaineis Painéis (585W) + $qtdInversores Inversor $potenciaInversor
 
     Valor do Investimento: ${moeda.format(investimento)}
 

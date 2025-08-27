@@ -1,5 +1,7 @@
 //import 'dart:ffi';//
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -8,6 +10,22 @@ import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 // 👇 ALTERAÇÃO: import para compartilhar no WhatsApp
 import 'package:url_launcher/url_launcher.dart';
+
+//FUNÇÃO PARA CALCULAR O PARCELAMENTO E JUROS
+Map<String, double> calcularParcelamento(int parcelas, double valor) {
+  double taxaJuros = 0.021; // 2,1% ao mês
+  double fator = (taxaJuros * (pow(1 + taxaJuros, parcelas))) /
+      (pow(1 + taxaJuros, parcelas) - 1);
+  double valorParcela = valor * fator;
+  double totalPago = valorParcela * parcelas;
+  double jurosTotal = totalPago - valor;
+
+  return {
+    "parcela": valorParcela,
+    "total": totalPago,
+    "juros": jurosTotal,
+  };
+}
 
 void main() {
   runApp(SolarApp());
@@ -100,6 +118,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
     });
   }
 
+  //MAPA DE ARRAYS PARA CALCULAR O INVERSOR E SUA CAPACIDADE MAXIMA
   final List<Map<String, dynamic>> tabelaInversores = [
     {"min": 2, "max": 8, "potencia": "3K"},
     {"min": 10, "max": 11, "potencia": "4K"},
@@ -130,6 +149,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
       "potencia": "Não definido",
     };
   }
+  //=======================================================================
 
   // ====== GERAÇÃO DO ORÇAMENTO (RECALCULA PARA GARANTIR CONSISTÊNCIA) ======
   void _gerarOrcamento() {
@@ -144,11 +164,13 @@ class _DadosClientePageState extends State<DadosClientePage> {
 
     final preco = precoPorKwp ?? 0;
     double valorInvestimento = potenciaTotal * preco;
+
     // ========== CALCULO DAS ECONOMIAS ========
     double economiaMensal = geracao * tarifa;
     double economiaAnual = economiaMensal * 12;
     double economia25anos = economiaAnual * 25;
 
+    // ========= CALCULO DA QUANTIDADE E CAPACIDADE DE INVERSORES
     final inv = calcularInversor(qtdPaineis);
 
     Navigator.push(
@@ -360,9 +382,15 @@ class OrcamentoPage extends StatelessWidget {
     Economia em 25 anos: ${moeda.format(economia25anos)}
     """;
 
+    // LOGICA DE PARCELAMENTOS E JUROS
+    final parcelas = [36, 48, 60, 72, 84];
+    final propostas = parcelas
+        .map((p) => {"p": p, "dados": calcularParcelamento(p, investimento)})
+        .toList();
+
     return Scaffold(
       appBar: AppBar(title: Text("AlphaMath - Simulador de Orçamentos")),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,7 +464,6 @@ class OrcamentoPage extends StatelessWidget {
                 ),
               ],
             ),
-
             SizedBox(height: 24),
             // Texto completo do orçamento
             Text(
@@ -445,58 +472,119 @@ class OrcamentoPage extends StatelessWidget {
             ),
 
             SizedBox(height: 24),
-            // Botão para copiar orçamento
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.greenAccent,
-                foregroundColor: Colors.black,
-              ),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: orcamentoTexto));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Orçamento copiado!")),
-                );
-              },
-              child: Text("Copiar Orçamento"),
-            ),
-
-            SizedBox(height: 12),
-            // Botão para exportar em PDF
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.greenAccent,
-                foregroundColor: Colors.black,
-              ),
-              onPressed: () async {
-                final pdf = pw.Document();
-                pdf.addPage(
-                  pw.Page(
-                    build: (pw.Context context) {
-                      return pw.Text(orcamentoTexto);
+// Linha responsiva com botões proporcionais
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Flexible(
+                  flex: 3, // peso proporcional
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.greenAccent,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: orcamentoTexto));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Orçamento copiado!")),
+                      );
                     },
+                    child: Text("COPIAR O ORÇAMENTO"),
                   ),
-                );
-                await Printing.layoutPdf(
-                    onLayout: (PdfPageFormat format) async => pdf.save());
-              },
-              child: Text("Exportar em PDF"),
+                ),
+                SizedBox(width: 8),
+                Flexible(
+                  flex: 3,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.greenAccent,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () async {
+                      final pdf = pw.Document();
+                      pdf.addPage(
+                        pw.Page(
+                          build: (pw.Context context) {
+                            return pw.Text(orcamentoTexto);
+                          },
+                        ),
+                      );
+                      await Printing.layoutPdf(
+                          onLayout: (PdfPageFormat format) async => pdf.save());
+                    },
+                    child: Text("GERAR PDF"),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Flexible(
+                  flex: 4, // botão WhatsApp um pouco maior
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () async {
+                      final url = Uri.parse(
+                          "https://wa.me/?text=${Uri.encodeComponent(orcamentoTexto)}");
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    label: Text("COMPARTILHAR NO WHATSAPP"),
+                  ),
+                ),
+              ],
             ),
 
+            SizedBox(height: 24),
+            Text("Propostas de Parcelamento",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                )),
+
             SizedBox(height: 12),
-            // 👇 ALTERAÇÃO: Botão de compartilhar no WhatsApp
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: propostas.map((p) {
+                  final dados = p["dados"] as Map<String, double>;
+                  return Container(
+                    width: 180,
+                    margin: EdgeInsets.only(right: 12),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.greenAccent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("${p["p"]}x",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black)),
+                        SizedBox(height: 8),
+                        Text("Parcela: ${moeda.format(dados["parcela"])}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                        Text("Total: ${moeda.format(dados["total"])}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                        Text("Juros: ${moeda.format(dados["juros"])}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
-              onPressed: () async {
-                final url = Uri.parse(
-                    "https://wa.me/?text=${Uri.encodeComponent(orcamentoTexto)}");
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              label: Text("Compartilhar no WhatsApp"),
             ),
           ],
         ),

@@ -1,7 +1,6 @@
 //import 'dart:ffi';//
 
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -35,7 +34,7 @@ class SolarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Orçamento Solar',
+      title: 'AlphaMath - Simulador de Orçamentos',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colors.black,
         primaryColor: Colors.greenAccent,

@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 //FUNÇÃO PARA CALCULAR O PARCELAMENTO E JUROS
 Map<String, double> calcularParcelamento(int parcelas, double valor) {
-  double taxaJuros = 0.021; // 2,1% ao mês
+  double taxaJuros = 0.021; // 2,1% AO MÊS
   double fator = (taxaJuros * (pow(1 + taxaJuros, parcelas))) /
       (pow(1 + taxaJuros, parcelas) - 1);
   double valorParcela = valor * fator;
@@ -326,6 +326,55 @@ class _DadosClientePageState extends State<DadosClientePage> {
   }
 }
 
+//CAIXA DE TEXTO DE INVESTIMENTO E GERAÇÃO
+class InfoCard extends StatelessWidget {
+  final String titulo;
+  final String valor;
+  final Color corValor;
+
+  const InfoCard({
+    Key? key,
+    required this.titulo,
+    required this.valor,
+    required this.corValor,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Colors.black87, Colors.black54],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 6,
+            offset: const Offset(2, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            valor,
+            style: TextStyle(
+              color: corValor,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 //============RESUMO DO ORÇAMENTO E PAINEIS DE APRESENTAÇÃO
 class OrcamentoPage extends StatelessWidget {
   final String nome;
@@ -364,6 +413,17 @@ class OrcamentoPage extends StatelessWidget {
       symbol: 'R\$',
     );
 
+    //MONTANDO O TEXTO DE PARCELAS
+    final parcelasT = [36, 48, 60, 72, 84];
+    final propostasT = parcelasT
+        .map((p) => {"p": p, "dados": calcularParcelamento(p, investimento)})
+        .toList();
+
+    String parcelasTexto = propostasT.map((p) {
+      final dados = p["dados"] as Map<String, double>;
+      return "${p["p"]}x de ${moeda.format(dados["parcela"])}";
+    }).join("\n");
+
     // Texto do orçamento (para PDF e copiar)
     String orcamentoTexto = """
     DESCRIÇÃO DO KIT
@@ -374,6 +434,7 @@ class OrcamentoPage extends StatelessWidget {
     Valor do Investimento: ${moeda.format(investimento)}
 
     ESTIMATIVA DE PARCELA (3 meses de carência)
+    $parcelasTexto
 
     Geração Mensal: ${geracaoMensal.toStringAsFixed(2)} kWh
     Economia Mensal: ${moeda.format(economiaMensal)}
@@ -393,208 +454,164 @@ class OrcamentoPage extends StatelessWidget {
       appBar: AppBar(title: Text("AlphaMath - Simulador de Orçamentos")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Caixas lado a lado (Investimento e Geração Mensal)
-            Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 800),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Caixa Verde (Investimento)
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent,
-                      borderRadius: BorderRadius.circular(12),
+                // ✅ Agora usa InfoCard
+                Row(
+                  children: [
+                    InfoCard(
+                      titulo: "Valor do Investimento",
+                      valor: moeda.format(investimento),
+                      corValor: Colors.greenAccent,
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          "INVESTIMENTO",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          moeda.format(investimento), // Formatado como moeda
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
+                    InfoCard(
+                      titulo: "Geração Mensal",
+                      valor: "${geracaoMensal.toStringAsFixed(2)} kWh",
+                      corValor: Colors.yellowAccent,
                     ),
-                  ),
+                  ],
                 ),
-                // Caixa Amarela (Geração Mensal)
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.amberAccent,
-                      borderRadius: BorderRadius.circular(12),
+                SizedBox(height: 24),
+                // Texto centralizado
+                Text(
+                  orcamentoTexto,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+
+                SizedBox(height: 24),
+                // Botões centralizados
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.greenAccent,
+                        foregroundColor: Colors.black,
+                      ),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: orcamentoTexto));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Orçamento copiado!")),
+                        );
+                      },
+                      child: Text("Copiar Orçamento"),
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          "GERAÇÃO MENSAL",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.greenAccent,
+                        foregroundColor: Colors.black,
+                      ),
+                      onPressed: () async {
+                        final pdf = pw.Document();
+                        pdf.addPage(
+                          pw.Page(
+                            build: (pw.Context context) {
+                              return pw.Text(orcamentoTexto);
+                            },
                           ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "${geracaoMensal.toStringAsFixed(2)} kWh", // 2 casas decimais
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
+                        );
+                        await Printing.layoutPdf(
+                            onLayout: (PdfPageFormat format) async =>
+                                pdf.save());
+                      },
+                      child: Text("Exportar em PDF"),
                     ),
-                  ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () async {
+                        final url = Uri.parse(
+                            "https://wa.me/?text=${Uri.encodeComponent(orcamentoTexto)}");
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      label: Text("Compartilhar"),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 32),
+                Text("Propostas de Parcelamento",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+
+                SizedBox(height: 12),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // se largura < 600px, scroll horizontal
+                    if (constraints.maxWidth < 600) {
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: propostas.map((p) {
+                            final dados = p["dados"] as Map<String, double>;
+                            return _buildCaixaParcelamento(p, dados, moeda);
+                          }).toList(),
+                        ),
+                      );
+                    } else {
+                      // em telas grandes -> centralizado em grid
+                      return Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 16,
+                        runSpacing: 16,
+                        children: propostas.map((p) {
+                          final dados = p["dados"] as Map<String, double>;
+                          return _buildCaixaParcelamento(p, dados, moeda);
+                        }).toList(),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
-            SizedBox(height: 24),
-            // Texto completo do orçamento
-            Text(
-              orcamentoTexto,
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-
-            SizedBox(height: 24),
-// Linha responsiva com botões proporcionais
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Flexible(
-                  flex: 3, // peso proporcional
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.greenAccent,
-                      foregroundColor: Colors.black,
-                    ),
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: orcamentoTexto));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Orçamento copiado!")),
-                      );
-                    },
-                    child: Text("COPIAR"),
-                  ),
-                ),
-                SizedBox(width: 8),
-                Flexible(
-                  flex: 3,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.greenAccent,
-                      foregroundColor: Colors.black,
-                    ),
-                    onPressed: () async {
-                      final pdf = pw.Document();
-                      pdf.addPage(
-                        pw.Page(
-                          build: (pw.Context context) {
-                            return pw.Text(orcamentoTexto);
-                          },
-                        ),
-                      );
-                      await Printing.layoutPdf(
-                          onLayout: (PdfPageFormat format) async => pdf.save());
-                    },
-                    child: Text("GERAR PDF"),
-                  ),
-                ),
-                SizedBox(width: 8),
-                Flexible(
-                  flex: 3, // botão WhatsApp um pouco maior
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () async {
-                      final url = Uri.parse(
-                          "https://wa.me/?text=${Uri.encodeComponent(orcamentoTexto)}");
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    label: Text("WHATSAPP"),
-                  ),
-                ),
-              ],
-            ),
-
-            /*  const SizedBox(height: 12),
-            const Text(
-              "Desenvolvido por João Pedro - Todos os direitos reservados",
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),*/
-
-            SizedBox(height: 24),
-            Text("Propostas de Parcelamento",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                )),
-
-            SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: propostas.map((p) {
-                  final dados = p["dados"] as Map<String, double>;
-                  return Container(
-                    width: 180,
-                    margin: EdgeInsets.only(right: 12),
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("${p["p"]}x",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black)),
-                        SizedBox(height: 8),
-                        Text("Parcela: ${moeda.format(dados["parcela"])}",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
-                        Text("Total: ${moeda.format(dados["total"])}",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
-                        Text("Juros: ${moeda.format(dados["juros"])}",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCaixaParcelamento(
+      Map p, Map<String, double> dados, NumberFormat moeda) {
+    return Container(
+      width: 180,
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.greenAccent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("${p["p"]}x",
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black)),
+          SizedBox(height: 8),
+          Text("Parcela: ${moeda.format(dados["parcela"])}",
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          Text("Total: ${moeda.format(dados["total"])}",
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          Text("Juros: ${moeda.format(dados["juros"])}",
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

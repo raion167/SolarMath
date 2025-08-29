@@ -331,44 +331,59 @@ class InfoCard extends StatelessWidget {
   final String titulo;
   final String valor;
   final Color corValor;
+  final List<Color> gradientColors;
 
   const InfoCard({
     Key? key,
     required this.titulo,
     required this.valor,
     required this.corValor,
+    required this.gradientColors,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.black87, Colors.black54],
+        gradient: LinearGradient(
+          colors: gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 6,
+            color: Colors.black.withOpacity(0.6),
+            blurRadius: 8,
             offset: const Offset(2, 4),
           )
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            valor,
-            style: TextStyle(
-              color: corValor,
+            titulo,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 8),
+          Text(
+            valor,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          )
         ],
       ),
     );
@@ -434,7 +449,7 @@ class OrcamentoPage extends StatelessWidget {
     Valor do Investimento: ${moeda.format(investimento)}
 
     ESTIMATIVA DE PARCELA (3 meses de carência)
-    $parcelasTexto
+  $parcelasTexto
 
     Geração Mensal: ${geracaoMensal.toStringAsFixed(2)} kWh
     Economia Mensal: ${moeda.format(economiaMensal)}
@@ -463,15 +478,28 @@ class OrcamentoPage extends StatelessWidget {
                 // ✅ Agora usa InfoCard
                 Row(
                   children: [
-                    InfoCard(
-                      titulo: "Valor do Investimento",
-                      valor: moeda.format(investimento),
-                      corValor: Colors.greenAccent,
+                    Expanded(
+                      child: InfoCard(
+                        titulo: "Valor do Investimento",
+                        valor: moeda.format(investimento),
+                        corValor: Colors.white,
+                        gradientColors: [
+                          Colors.green.shade900,
+                          Colors.green.shade600
+                        ],
+                      ),
                     ),
-                    InfoCard(
-                      titulo: "Geração Mensal",
-                      valor: "${geracaoMensal.toStringAsFixed(2)} kWh",
-                      corValor: Colors.yellowAccent,
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: InfoCard(
+                        titulo: "Geração Mensal",
+                        valor: "${geracaoMensal.toStringAsFixed(2)} kWh",
+                        corValor: Colors.black,
+                        gradientColors: [
+                          Colors.amber.shade900,
+                          Colors.amber.shade600
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -508,12 +536,257 @@ class OrcamentoPage extends StatelessWidget {
                         backgroundColor: Colors.greenAccent,
                         foregroundColor: Colors.black,
                       ),
+                      //=== EXPORTAÇÃO E FORMATAÇÃO DO PDF ========//
                       onPressed: () async {
                         final pdf = pw.Document();
                         pdf.addPage(
                           pw.Page(
+                            pageFormat: PdfPageFormat.a4,
                             build: (pw.Context context) {
-                              return pw.Text(orcamentoTexto);
+                              return pw.Column(
+                                crossAxisAlignment:
+                                    pw.CrossAxisAlignment.center,
+                                children: [
+                                  // Cabeçalho centralizado
+                                  pw.Center(
+                                    child: pw.Column(
+                                      children: [
+                                        pw.SizedBox(height: 8),
+                                        pw.Text(
+                                          "ALPHA ENERGIA",
+                                          style: pw.TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: pw.FontWeight.bold),
+                                          textAlign: pw.TextAlign.center,
+                                        ),
+                                        pw.Text(
+                                          "PROPOSTA COMERCIAL",
+                                          style: pw.TextStyle(fontSize: 12),
+                                          textAlign: pw.TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  pw.SizedBox(height: 20),
+
+                                  // Corpo do orçamento: duas colunas
+                                  pw.Row(
+                                    crossAxisAlignment:
+                                        pw.CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        pw.MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Coluna esquerda
+                                      pw.Expanded(
+                                        child: pw.Column(
+                                          crossAxisAlignment:
+                                              pw.CrossAxisAlignment.start,
+                                          children: [
+                                            // Data
+                                            pw.Text(
+                                              "Data: ${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}",
+                                              style: pw.TextStyle(fontSize: 12),
+                                            ),
+                                            pw.SizedBox(height: 12),
+
+                                            // DADOS DO CLIENTE
+                                            pw.Container(
+                                              padding: pw.EdgeInsets.all(8),
+                                              color: PdfColors.grey200,
+                                              child: pw.Column(
+                                                crossAxisAlignment:
+                                                    pw.CrossAxisAlignment.start,
+                                                children: [
+                                                  pw.Text(
+                                                    "DADOS DO CLIENTE",
+                                                    style: pw.TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            pw.FontWeight.bold),
+                                                  ),
+                                                  pw.SizedBox(height: 4),
+                                                  pw.Text("Cliente: $nome",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Consumo Mensal: ${consumo.toStringAsFixed(2)} kWh",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                ],
+                                              ),
+                                            ),
+                                            pw.SizedBox(height: 12),
+
+                                            // INVESTIMENTO E ECONOMIA
+                                            pw.Container(
+                                              padding: pw.EdgeInsets.all(8),
+                                              color: PdfColors.green100,
+                                              child: pw.Column(
+                                                crossAxisAlignment:
+                                                    pw.CrossAxisAlignment.start,
+                                                children: [
+                                                  pw.Text(
+                                                    "INVESTIMENTO E ECONOMIA",
+                                                    style: pw.TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            pw.FontWeight.bold),
+                                                  ),
+                                                  pw.SizedBox(height: 4),
+                                                  pw.Text(
+                                                      "Valor do Investimento: ${moeda.format(investimento)}",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Geração Mensal: ${geracaoMensal.toStringAsFixed(2)} kWh",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Economia Anual: ${moeda.format(economiaAnual)}",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                ],
+                                              ),
+                                            ),
+                                            pw.SizedBox(height: 12),
+
+                                            // OPÇÕES DE PARCELAMENTO
+                                            pw.Container(
+                                              padding: pw.EdgeInsets.all(8),
+                                              color: PdfColors.blue100,
+                                              child: pw.Column(
+                                                crossAxisAlignment:
+                                                    pw.CrossAxisAlignment.start,
+                                                children: [
+                                                  pw.Text(
+                                                    "OPÇÕES DE PARCELAMENTO",
+                                                    style: pw.TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            pw.FontWeight.bold),
+                                                  ),
+                                                  pw.SizedBox(height: 4),
+                                                  pw.Text(
+                                                    "$parcelasTexto",
+                                                    style: pw.TextStyle(
+                                                        fontSize: 12),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      pw.SizedBox(width: 10),
+
+                                      // Coluna direita
+                                      pw.Expanded(
+                                        child: pw.Column(
+                                          crossAxisAlignment:
+                                              pw.CrossAxisAlignment.start,
+                                          children: [
+                                            // SISTEMA PROPOSTO
+                                            pw.Container(
+                                              padding: pw.EdgeInsets.all(8),
+                                              color: PdfColors.yellow100,
+                                              child: pw.Column(
+                                                crossAxisAlignment:
+                                                    pw.CrossAxisAlignment.start,
+                                                children: [
+                                                  pw.Text(
+                                                    "SISTEMA PROPOSTO",
+                                                    style: pw.TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            pw.FontWeight.bold),
+                                                  ),
+                                                  pw.SizedBox(height: 4),
+                                                  pw.Text(
+                                                      "Potência do Kit: ${potenciaTotal.toStringAsFixed(2)} kWp",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Quantidade de Paineis: $qtdPaineis",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Inversor: $qtdInversores de $potenciaInversor",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                ],
+                                              ),
+                                            ),
+                                            pw.SizedBox(height: 12),
+
+                                            // PREÇO POR KWH E ECONOMIAS
+                                            pw.Container(
+                                              padding: pw.EdgeInsets.all(8),
+                                              color: PdfColors.orange100,
+                                              child: pw.Column(
+                                                crossAxisAlignment:
+                                                    pw.CrossAxisAlignment.start,
+                                                children: [
+                                                  pw.SizedBox(height: 4),
+                                                  pw.Text(
+                                                      "Preço por kWh: ${moeda.format(precoPorKwp)}",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Economia Mensal: ${moeda.format(economiaMensal)}",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                  pw.Text(
+                                                      "Economia em 25 anos: ${moeda.format(economia25anos)}",
+                                                      style: pw.TextStyle(
+                                                          fontSize: 12)),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  pw.SizedBox(height: 20),
+                                  pw.Divider(),
+
+                                  // RESUMO TÉCNICO
+                                  pw.Container(
+                                    padding: pw.EdgeInsets.all(8),
+                                    color: PdfColors.grey300,
+                                    child: pw.Column(
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.start,
+                                      children: [
+                                        pw.Text(
+                                          "RESUMO TÉCNICO",
+                                          style: pw.TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: pw.FontWeight.bold),
+                                        ),
+                                        pw.SizedBox(height: 4),
+                                        pw.Bullet(
+                                            text:
+                                                "Sistema Fotovoltaico de ${potenciaTotal.toStringAsFixed(2)} kWp"),
+                                        pw.Bullet(
+                                            text:
+                                                "$qtdPaineis Painéis Solares de 585 W cada"),
+                                        pw.Bullet(
+                                            text:
+                                                "$qtdInversores inversor de $potenciaInversor para conversão CC/CA"),
+                                        pw.Bullet(
+                                            text:
+                                                "Estimativa de geração: ${geracaoMensal.toStringAsFixed(2)} kWh/mês"),
+                                        pw.Bullet(
+                                            text:
+                                                "Economia estimada: ${moeda.format(economiaMensal)}/mês"),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
                             },
                           ),
                         );

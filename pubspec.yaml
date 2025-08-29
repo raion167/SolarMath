@@ -10,7 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  shared_preferences: ^2.1.1
+  
   # Ícones do Material
   cupertino_icons: ^1.0.8
 

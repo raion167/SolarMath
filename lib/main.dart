@@ -9,6 +9,7 @@ import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 // 👇 ALTERAÇÃO: import para compartilhar no WhatsApp
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //FUNÇÃO PARA CALCULAR O PARCELAMENTO E JUROS
 Map<String, double> calcularParcelamento(int parcelas, double valor) {
@@ -294,7 +295,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
               // Botão Gerar Orçamento
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
+                  backgroundColor: const Color.fromARGB(255, 6, 133, 72),
                   foregroundColor: Colors.black,
                 ),
                 onPressed: () {
@@ -316,10 +317,29 @@ class _DadosClientePageState extends State<DadosClientePage> {
                   }
                   _gerarOrcamento();
                 },
-                child: const Text("GERAR ORÇAMENTO"),
+                child: const Text("Gerar Proposta",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(8),
+        color: Colors.grey.shade900,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              "Desenvolvido por João Pedro",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            Text(
+              "© 2025 - Todos os direitos reservados",
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
@@ -419,7 +439,6 @@ class OrcamentoPage extends StatelessWidget {
     required this.qtdInversores,
     required this.potenciaInversor,
   });
-
   @override
   Widget build(BuildContext context) {
     // Formatador de moeda (R$)
@@ -427,7 +446,6 @@ class OrcamentoPage extends StatelessWidget {
       locale: 'pt_BR',
       symbol: 'R\$',
     );
-
     //MONTANDO O TEXTO DE PARCELAS
     final parcelasT = [36, 48, 60, 72, 84];
     final propostasT = parcelasT

@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 // 👇 ALTERAÇÃO: import para compartilhar no WhatsApp
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 
 //FUNÇÃO PARA CALCULAR O PARCELAMENTO E JUROS
 Map<String, double> calcularParcelamento(int parcelas, double valor) {
@@ -296,7 +297,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 6, 133, 72),
-                  foregroundColor: Colors.black,
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: () {
                   // Validação simples: exige consumo > 0 e preço selecionado
@@ -538,8 +539,8 @@ class OrcamentoPage extends StatelessWidget {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent,
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color.fromARGB(255, 6, 133, 72),
+                        foregroundColor: Colors.white,
                       ),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: orcamentoTexto));
@@ -551,8 +552,8 @@ class OrcamentoPage extends StatelessWidget {
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent,
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color.fromARGB(255, 6, 133, 72),
+                        foregroundColor: Colors.white,
                       ),
                       //=== EXPORTAÇÃO E FORMATAÇÃO DO PDF ========//
                       onPressed: () async {
@@ -816,18 +817,17 @@ class OrcamentoPage extends StatelessWidget {
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: const Color.fromARGB(255, 6, 133, 72),
                         foregroundColor: Colors.white,
                       ),
-                      onPressed: () async {
-                        final url = Uri.parse(
-                            "https://wa.me/?text=${Uri.encodeComponent(orcamentoTexto)}");
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url,
-                              mode: LaunchMode.externalApplication);
-                        }
+                      onPressed: () {
+                        Share.share(
+                          orcamentoTexto,
+                          subject: "Orçamento Solar",
+                        );
                       },
-                      label: Text("Compartilhar"),
+                      icon: const Icon(Icons.share),
+                      label: const Text("Compartilhar"),
                     ),
                   ],
                 ),
@@ -881,7 +881,7 @@ class OrcamentoPage extends StatelessWidget {
       width: 180,
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.greenAccent,
+        color: const Color.fromARGB(255, 6, 133, 72),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -889,9 +889,9 @@ class OrcamentoPage extends StatelessWidget {
         children: [
           Text("${p["p"]}x",
               style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black)),
+                  color: Colors.white)),
           SizedBox(height: 8),
           Text("Parcela: ${moeda.format(dados["parcela"])}",
               style:

@@ -72,6 +72,37 @@ class _DadosClientePageState extends State<DadosClientePage> {
   double? economia25anos;
   double tarifa = 1.05; //Tarifa em R$/KWH
 
+  //CONTADOR DE PROPOSTAS
+  int contadorPropostas = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarContador();
+  }
+
+  //CARREGAR CONTADOR SALVO
+  Future<void> _carregarContador() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      contadorPropostas = prefs.getInt('contadorPropostas') ?? 0;
+    });
+  }
+
+  //SALVAR CONTADOR
+  Future<void> _salvarContador() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('contadorPropostas', contadorPropostas);
+  }
+
+  //INCREMENTAR E SALVAR
+  void _incrementarContador() {
+    setState(() {
+      contadorPropostas++;
+    });
+    _salvarContador();
+  }
+
   // ====== CONSTANTES DAS FÓRMULAS ======
   // Potência de um painel (kWp) e geração mensal por painel (kWh/mês)
   static const double _potenciaPainel = 0.585;
@@ -198,7 +229,18 @@ class _DadosClientePageState extends State<DadosClientePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("AlphaMath - Simulador de Orçamentos")),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.black,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 25),
+          child: Image.asset(
+            "assets/app_icon.png",
+            height: 150,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -210,7 +252,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 controller: nomeController,
                 decoration: const InputDecoration(
                   labelText: "Nome do Cliente",
-                  labelStyle: TextStyle(color: Colors.greenAccent),
+                  labelStyle:
+                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -227,7 +270,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 ],
                 decoration: const InputDecoration(
                   labelText: "Consumo Mensal (kWh)",
-                  labelStyle: TextStyle(color: Colors.greenAccent),
+                  labelStyle:
+                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
                 ),
                 style: const TextStyle(color: Colors.white),
                 onChanged: (value) {
@@ -243,7 +287,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: "Quantidade de Painéis",
-                  labelStyle: TextStyle(color: Colors.greenAccent),
+                  labelStyle:
+                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -255,7 +300,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: "Potência Total (kWp)",
-                  labelStyle: TextStyle(color: Colors.greenAccent),
+                  labelStyle:
+                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -267,7 +313,8 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 dropdownColor: Colors.black,
                 decoration: const InputDecoration(
                   labelText: "Preço por kWp",
-                  labelStyle: TextStyle(color: Colors.greenAccent),
+                  labelStyle:
+                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
                 ),
                 items: List.generate(
                   15,
@@ -296,7 +343,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
               // Botão Gerar Orçamento
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 6, 133, 72),
+                  backgroundColor: const Color.fromARGB(255, 1, 245, 42),
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
@@ -316,11 +363,22 @@ class _DadosClientePageState extends State<DadosClientePage> {
                     );
                     return;
                   }
+                  //INCREMENTA O CONTADOR
+                  _incrementarContador();
                   _gerarOrcamento();
                 },
                 child: const Text("Gerar Proposta",
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Propostas geradas: $contadorPropostas",
+                style: const TextStyle(
+                  color: const Color.fromARGB(255, 1, 245, 42),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -485,7 +543,18 @@ class OrcamentoPage extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text("AlphaMath - Simulador de Orçamentos")),
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.black,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 25),
+          child: Image.asset(
+            "assets/app_icon.png",
+            height: 150,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
@@ -537,22 +606,23 @@ class OrcamentoPage extends StatelessWidget {
                   runSpacing: 12,
                   alignment: WrapAlignment.center,
                   children: [
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 6, 133, 72),
+                        backgroundColor: const Color.fromARGB(255, 9, 76, 175),
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: orcamentoTexto));
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Orçamento copiado!")),
+                          const SnackBar(content: Text("Orçamento copiado!")),
                         );
                       },
-                      child: Text("Copiar Orçamento"),
+                      icon: const Icon(Icons.copy),
+                      label: const Text("Copiar Orçamento"),
                     ),
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 6, 133, 72),
+                        backgroundColor: const Color.fromARGB(255, 228, 49, 49),
                         foregroundColor: Colors.white,
                       ),
                       //=== EXPORTAÇÃO E FORMATAÇÃO DO PDF ========//
@@ -813,18 +883,39 @@ class OrcamentoPage extends StatelessWidget {
                             onLayout: (PdfPageFormat format) async =>
                                 pdf.save());
                       },
-                      child: Text("Exportar em PDF"),
+                      icon: const Icon(Icons.picture_as_pdf),
+                      label: const Text("Exportar em PDF"),
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 6, 133, 72),
+                        backgroundColor: const Color.fromARGB(255, 1, 245, 42),
                         foregroundColor: Colors.white,
                       ),
-                      onPressed: () {
-                        Share.share(
-                          orcamentoTexto,
-                          subject: "Orçamento Solar",
-                        );
+                      onPressed: () async {
+                        final mensagem = Uri.encodeComponent(orcamentoTexto);
+
+                        // esquema oficial do WhatsApp
+                        final uri = Uri.parse("whatsapp://send?text=$mensagem");
+
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          final fallback =
+                              Uri.parse("https://wa.me/?text=$mensagem");
+                          if (await canLaunchUrl(fallback)) {
+                            await launchUrl(fallback,
+                                mode: LaunchMode.externalApplication);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      "Não foi possível abrir o Whattsapp")),
+                            );
+                          }
+                        }
                       },
                       icon: const Icon(Icons.share),
                       label: const Text("Compartilhar"),
@@ -881,7 +972,7 @@ class OrcamentoPage extends StatelessWidget {
       width: 180,
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 6, 133, 72),
+        color: const Color.fromARGB(255, 1, 245, 42),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

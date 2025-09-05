@@ -11,6 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.1.1
+  workmanager: ^0.9.0+3
+  flutter_local_notifications: ^19.4.1
+  path_provider: ^2.1.5
+  timezone: ^0.10.1
+  flutter_secure_storage: ^9.2.4
+  crypto: ^3.0.6
   
   # Ícones do Material
   cupertino_icons: ^1.0.8
@@ -34,12 +40,17 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.4
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/app_icon.png"
+  image_path: "assets/icon.png"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/app_icon.png
+    - assets/logo1.png

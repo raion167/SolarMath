@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 // 👇 ALTERAÇÃO: import para compartilhar no WhatsApp
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:share_plus/share_plus.dart';
 
 //FUNÇÃO PARA CALCULAR O PARCELAMENTO E JUROS
 Map<String, double> calcularParcelamento(int parcelas, double valor) {
@@ -232,11 +231,12 @@ class _DadosClientePageState extends State<DadosClientePage> {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.black,
+        toolbarHeight: 120,
         title: Padding(
-          padding: const EdgeInsets.only(top: 25),
+          padding: const EdgeInsets.only(top: 10),
           child: Image.asset(
-            "assets/app_icon.png",
-            height: 150,
+            "assets/logo1.png",
+            height: 110,
             fit: BoxFit.contain,
           ),
         ),
@@ -252,8 +252,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 controller: nomeController,
                 decoration: const InputDecoration(
                   labelText: "Nome do Cliente",
-                  labelStyle:
-                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -270,8 +269,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 ],
                 decoration: const InputDecoration(
                   labelText: "Consumo Mensal (kWh)",
-                  labelStyle:
-                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
                 style: const TextStyle(color: Colors.white),
                 onChanged: (value) {
@@ -287,8 +285,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: "Quantidade de Painéis",
-                  labelStyle:
-                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -300,8 +297,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 readOnly: true,
                 decoration: const InputDecoration(
                   labelText: "Potência Total (kWp)",
-                  labelStyle:
-                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
                 style: const TextStyle(color: Colors.white),
               ),
@@ -313,8 +309,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 dropdownColor: Colors.black,
                 decoration: const InputDecoration(
                   labelText: "Preço por kWp",
-                  labelStyle:
-                      TextStyle(color: const Color.fromARGB(255, 1, 245, 42)),
+                  labelStyle: TextStyle(color: Colors.white),
                 ),
                 items: List.generate(
                   15,
@@ -339,11 +334,10 @@ class _DadosClientePageState extends State<DadosClientePage> {
                 },
               ),
               const SizedBox(height: 24),
-
               // Botão Gerar Orçamento
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 1, 245, 42),
+                  backgroundColor: const Color.fromARGB(255, 66, 66, 66),
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
@@ -375,7 +369,7 @@ class _DadosClientePageState extends State<DadosClientePage> {
               Text(
                 "Propostas geradas: $contadorPropostas",
                 style: const TextStyle(
-                  color: const Color.fromARGB(255, 1, 245, 42),
+                  color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -546,11 +540,12 @@ class OrcamentoPage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.black,
+        toolbarHeight: 120,
         title: Padding(
-          padding: const EdgeInsets.only(top: 25),
+          padding: const EdgeInsets.only(top: 15),
           child: Image.asset(
-            "assets/app_icon.png",
-            height: 150,
+            "assets/logo1.png",
+            height: 110,
             fit: BoxFit.contain,
           ),
         ),
@@ -888,7 +883,7 @@ class OrcamentoPage extends StatelessWidget {
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 1, 245, 42),
+                        backgroundColor: const Color.fromARGB(255, 66, 66, 66),
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () async {
@@ -972,7 +967,7 @@ class OrcamentoPage extends StatelessWidget {
       width: 180,
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 1, 245, 42),
+        color: const Color.fromARGB(255, 66, 66, 66),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
